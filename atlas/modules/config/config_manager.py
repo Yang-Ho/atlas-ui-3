@@ -294,6 +294,11 @@ class AppSettings(BaseSettings):
         False,
         description="Enable metrics logging for user activities (LLM calls, tool calls, file uploads, errors)",
         validation_alias=AliasChoices("FEATURE_METRICS_LOGGING_ENABLED"),
+    # Suppress LiteLLM verbose logging (independent of log_level)
+    feature_suppress_litellm_logging: bool = Field(
+        default=True,
+        description="Suppress LiteLLM verbose stdout/debug output by setting LITELLM_LOG=ERROR",
+        validation_alias=AliasChoices("FEATURE_SUPPRESS_LITELLM_LOGGING"),
     )
     # Suppress LiteLLM verbose logging (independent of log_level)
     feature_suppress_litellm_logging: bool = Field(
