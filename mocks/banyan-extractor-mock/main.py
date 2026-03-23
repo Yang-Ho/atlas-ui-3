@@ -45,7 +45,8 @@ def sanitize_filename_for_log(filename: str) -> str:
 # ---------------------------------------------------------------------------
 
 ENDPOINT_CONFIG = {
-    "url": "https://NEMOTRON_ENDPOINT_URL/v1",
+        #"url": "https://NEMOTRON_ENDPOINT_URL/v1",
+    "url": "https://nemotron-atlas.apps.goodall.sandia.gov/v1/",
     "model_name": "nvidia/nemotron-parse",
 }
 
@@ -119,19 +120,27 @@ def extract_pdf_with_banyan(pdf_bytes: bytes, config: dict) -> tuple[str, dict]:
     """
     from banyan_ingest import NemoparseProcessor
 
-    with tempfile.NamedTemporaryFile(suffix=".pdf", delete=False) as tmp:
-        tmp.write(pdf_bytes)
-        tmp_path = tmp.name
-
     try:
         processor = NemoparseProcessor(
             endpoint_url=config["url"],
             model_name=config["model_name"],
         )
-        result = processor.process_document(tmp_path)
-        full_text = result.get_output_as_markdown()
+        print("Getting extracted text")
+
+        pdf_file = io.BytesIO(pdf_bytes)
+        result = processor.process_document(pdf_file)
+
+        pages = []
+        for i, page_text in enumerate(result.get_content_list()):
+            pages.append(f"--- Page {i + 1} ---\n{page_text}")
+
+        full_text = "\n\n".join(pages) if pages else "[No extractable text found in PDF]"
+
+        #print("Getting extracted text as markdown")
+        #full_text = result.get_output_as_markdown()
     finally:
-        os.unlink(tmp_path)
+        #os.unlink(tmp_path)
+        pass
 
     metadata = {
         "char_count": len(full_text),
