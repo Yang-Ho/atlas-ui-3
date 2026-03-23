@@ -53,7 +53,17 @@ class ExtractionResponse(BaseModel):
 
 def extract_text_from_pdf(file_bytes: bytes) -> tuple[str, dict]:
     """Extract text from PDF bytes. Returns (text, metadata)."""
-    from pypdf import PdfReader
+    try:
+        from pypdf import PdfReader
+    except ImportError:
+        try:
+            from PyPDF2 import PdfReader
+        except ImportError:
+            return (
+                "[PDF text extraction unavailable - install pypdf: "
+                "pip install pypdf]",
+                {"error": "pypdf not installed"},
+            )
 
     reader = PdfReader(io.BytesIO(file_bytes))
     pages = []
